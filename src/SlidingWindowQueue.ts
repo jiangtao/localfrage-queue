@@ -1,11 +1,7 @@
-import localforage from 'localforage';
-
-localforage.setDriver([localforage.INDEXEDDB, localforage.LOCALSTORAGE, localforage.WEBSQL]);
-
-export class SlidingWindowQueue {
+import BaseLocalForage from './Base';
+export class SlidingWindowQueue extends BaseLocalForage {
     private size: number;
-    private storageInstance: LocalForage;
-    private defaultItems: unknown[] = [];
+    private defaultItems: any[] = [];
 
     /**
      * 构造函数
@@ -13,25 +9,8 @@ export class SlidingWindowQueue {
      * @param name 用于创建 localforage 实例的名称
      */
     constructor(size: number, name: string) {
+        super(name);
         this.size = size;
-        this.storageInstance = localforage.createInstance({
-            name,
-        });
-    }
-
-    /**
-     * 初始化方法，用于在 localforage 中创建一个新的队列（如果它还不存在）
-     * @param key 用于在 localforage 中存储队列的键
-     */
-    async init(key: string): Promise<void> {
-        try {
-            const items = await this.storageInstance.getItem(key);
-            if (!items) {
-                await this.storageInstance.setItem(key, this.defaultItems);
-            }
-        } catch (error) {
-            console.error('Failed to initialize the queue:', error);
-        }
     }
 
     /**
@@ -60,7 +39,6 @@ export class SlidingWindowQueue {
             const items = await this.getItems(key);
             return items[0]
         } catch (error) {
-            console.error('Failed to enqueue item:', error);
             throw error;
         }
     }
@@ -70,7 +48,6 @@ export class SlidingWindowQueue {
             const items = await this.getItems(key);
             return items[items.length - 1]
         } catch (error) {
-            console.error('Failed to enqueue item:', error);
             throw error;
         }
     }
@@ -85,7 +62,7 @@ export class SlidingWindowQueue {
             items.unshift(item);
             await this.storageInstance.setItem(key, items);
         } catch (error) {
-            console.error('Failed to enqueue item:', error);
+            console.error('Failed to pushHead item:', error);
             throw error;
         }
     }
@@ -116,7 +93,6 @@ export class SlidingWindowQueue {
         try {
             return await this.storageInstance.getItem(key) || this.defaultItems;
         } catch (error) {
-            console.error('Failed to get items:', error);
             throw error;
         }
     }

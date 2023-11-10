@@ -4,6 +4,15 @@ Based on localForage, some commonly used queue operations are implemented, which
 
 ## Usage
 
+### BaseLocalForage
+
+Add quota method, convenient for safer detection and practical use.
+
+```tsx
+demoQueue.isQuotaExceededError(e) // Determine whether the error exception is over quota
+await demoQueue.getRemaining() //  Get the remaining quota bits of the runtime environment (browser)
+```
+
 ### SlidingWindowQueue
 
 Sliding window queue, used to maintain the length of the queue. When the length of the queue exceeds the set value, the data at the head or tail of the queue will be automatically deleted.
