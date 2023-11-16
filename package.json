@@ -1,12 +1,13 @@
 {
   "name": "localforage-queue",
-  "version": "0.0.3",
+  "version": "0.0.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublish": "npm run build"
   },
   "exports": {
     "types": "./dist/index.d.ts",

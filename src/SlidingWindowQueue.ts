@@ -2,15 +2,17 @@ import BaseLocalForage from './Base';
 export class SlidingWindowQueue extends BaseLocalForage {
     private size: number;
     private defaultItems: any[] = [];
+    private checkDuplicate: boolean;
 
     /**
      * 构造函数
      * @param size 队列的最大长度
      * @param name 用于创建 localforage 实例的名称
      */
-    constructor(size: number, name: string) {
+    constructor(size: number, name: string, checkDuplicate = false) {
         super(name);
         this.size = size;
+        this.checkDuplicate = checkDuplicate;
     }
 
     /**
@@ -22,10 +24,16 @@ export class SlidingWindowQueue extends BaseLocalForage {
     async enqueue(key: string, item: any): Promise<void> {
         try {
             const items: any[] = await this.storageInstance.getItem(key) || this.defaultItems;
-
-            if (items.length >= this.size) {
+            if (this.checkDuplicate) {
+                const index = items.findIndex((i) => i === item);
+                if (index !== -1) {
+                    items.splice(index, 1);
+                    console.warn('enqueue duplicate item:', item);
+                }
+            } else if (items.length >= this.size) {
                 items.shift();
             }
+
             items.push(item);
             await this.storageInstance.setItem(key, items);
         } catch (error) {
@@ -55,14 +63,19 @@ export class SlidingWindowQueue extends BaseLocalForage {
     async pushHead(key: string, item: any): Promise<void> {
         try {
             const items: any[] = await this.storageInstance.getItem(key) || this.defaultItems;
-
-            if (items.length >= this.size) {
+            if (this.checkDuplicate) {
+                const index = items.findIndex((i) => i === item);
+                if (index !== -1) {
+                    items.splice(index, 1);
+                    console.warn('pushHead duplicate item:', item);
+                }
+            }else if (items.length >= this.size) {
                 items.pop();
             }
             items.unshift(item);
             await this.storageInstance.setItem(key, items);
         } catch (error) {
-            console.error('Failed to pushHead item:', error);
+            console.warn('Failed to pushHead item:', error);
             throw error;
         }
     }
